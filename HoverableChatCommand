@@ -1,0 +1,117 @@
+package me.trickz.block.main;
+
+import java.io.File;
+import java.util.ArrayList;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
+
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+
+public class Main extends JavaPlugin implements Listener, CommandExecutor {	
+	  
+	public static ArrayList<String> nofall = new ArrayList();
+	
+	public static Plugin plugin = null;
+	
+	  @EventHandler
+	  public void onPlayerFall(EntityDamageEvent e)
+	  {
+	    if ((e.getEntity() instanceof Player))
+	    {
+	      Player name = (Player)e.getEntity();
+	      if ((e.getCause() == EntityDamageEvent.DamageCause.FALL) && (this.nofall.contains(name.getName()))) {
+	        e.setCancelled(true);
+	      }
+	    }
+	  }
+	
+	PluginManager pm = getServer().getPluginManager();
+
+	File file;
+	FileConfiguration config;
+	
+	private Scoreboard s;
+	
+	public void onEnable() {
+		
+	    getCommand("potion").setExecutor(new Command_pot());
+		
+	    FileUtil.instance.setup(getDataFolder());
+	    getCommand("tntfill").setExecutor(new TnTFill());
+		
+	    Bukkit.getPluginCommand("jl").setExecutor(new Command_JellyLegs());
+	    
+		this.s = Bukkit.getScoreboardManager().getMainScoreboard();
+		registerHealthbar();
+			    
+	    this.getServer().getPluginManager().registerEvents(this, this);
+	    this.saveDefaultConfig();
+	    
+	    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+	    
+	    console.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c-=-=-=-=-=-=-=-"));
+	    console.sendMessage(ChatColor.translateAlternateColorCodes('&', " &6WSHelp Loaded "));
+	    console.sendMessage(ChatColor.translateAlternateColorCodes('&', "  &6Made Trickz "));
+	    console.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c-=-=-=-=-=-=-=-"));
+	    
+	 }
+	  
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+	      if ((sender instanceof Player)) {
+	        Player player = (Player)sender;
+	        if (cmd.getName().equalsIgnoreCase("help")) {
+	        	
+	    		TextComponent tc = new TextComponent();
+	    		tc.setText("Testing");
+	    		tc.addExtra(". " + ChatColor.GREEN + "Click to execute a command");
+	    		tc.setBold(true);
+	    		tc.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("testing").create()));
+	    		player.spigot().sendMessage(tc);
+
+		      } else {
+		    	  if (cmd.getName().equalsIgnoreCase("wsabout")) {
+				      if ((sender instanceof Player)) {
+				    	  
+				      	  player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&m-------&4&m-------&c&m-------"));
+				      	  player.sendMessage(ChatColor.translateAlternateColorCodes('&', "        &c&lWSHelp &71.0"));
+				      	  player.sendMessage(ChatColor.translateAlternateColorCodes('&', "             &7/help"));
+				      	  player.sendMessage(ChatColor.translateAlternateColorCodes('&', "     &7Credit to &eTrickzTwix"));
+				      	  player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&m-------&4&m-------&c&m-------"));
+
+			       }
+		    	  }
+		      	 }
+		      	}
+		  	return true;
+	}
+		
+		public void registerHealthbar() {
+			if (this.s.getObjective("health") != null) {
+				this.s.getObjective("health").unregister();
+			}
+			Objective o = this.s.registerNewObjective("health", "health");
+			o.setDisplayName(ChatColor.DARK_AQUA + "❤");
+			o.setDisplaySlot(DisplaySlot.BELOW_NAME);
+	}
+}
+
+
